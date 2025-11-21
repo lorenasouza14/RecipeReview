@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using RecipeReview.Data;
+
 namespace RecipeReview
 {
     public class Program
@@ -8,6 +11,11 @@ namespace RecipeReview
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddControllers();
+
+            //Junta a classe de contexto com o SQL Server
+            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

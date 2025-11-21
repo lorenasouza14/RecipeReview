@@ -1,83 +1,86 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RecipeReview.Classes;
+using RecipeReview.Data;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace RecipeReview.Controllers
 {
-    public class UsuarioController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UsuarioController : ControllerBase
     {
-        // GET: UsuarioController
-        public ActionResult Index()
+
+        private readonly DataContext _context;
+
+        public UsuarioController(DataContext context)
         {
-            return View();
+            _context = context;
         }
 
-        // GET: UsuarioController/Details/5
-        public ActionResult Details(int id)
+        // GET: api/<UsuarioController>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
-            return View();
+            return await _context.UsuarioTable
+                .Include(u => u.ReceitasCriadas)
+                .Include(u => u.Avaliacoes)
+                .ToListAsync();
         }
 
-        // GET: UsuarioController/Create
-        public ActionResult Create()
+        // GET api/<UsuarioController>/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Usuario>> GetUsuario(int id)
         {
-            return View();
+            var user = await _context.UsuarioTable
+                .Include(u => u.ReceitasCriadas)
+                .Include(u => u.Avaliacoes)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+                return NotFound();
+
+            return user;
         }
 
-        // POST: UsuarioController/Create
+        // POST api/<UsuarioController>
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            _context.UsuarioTable.Add(usuario);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuario);
         }
 
-        // GET: UsuarioController/Edit/5
-        public ActionResult Edit(int id)
+
+        // PUT api/<UsuarioController>/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
         {
-            return View();
+            if (id != usuario.Id)
+                return BadRequest();
+
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
-        // POST: UsuarioController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // DELETE api/<UsuarioController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUsuario(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+            var usuario = await _context.UsuarioTable.FindAsync(id);
 
-        // GET: UsuarioController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+            if (usuario == null)
+                return NotFound();
 
-        // POST: UsuarioController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            _context.UsuarioTable.Remove(usuario);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

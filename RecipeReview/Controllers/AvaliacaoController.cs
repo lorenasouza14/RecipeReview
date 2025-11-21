@@ -1,26 +1,40 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RecipeReview.Data;
 
 namespace RecipeReview.Controllers
 {
     public class AvaliacaoController : Controller
     {
-        // GET: AvaliacaoController
-        public ActionResult Index()
+        private readonly DataContext _context;
+
+        public AvaliacaoController(DataContext context)
         {
-            return View();
+            _context = context;
+        }
+        // GET: AvaliacaoController
+        
+        public async Task<IActionResult> Get()
+        {
+            var avalis = await _context.AvaliacaoTable
+                .Include (t=> t.Receita)
+                .ToListAsync();
+
+            return Ok(avalis);
         }
 
         // GET: AvaliacaoController/Details/5
-        public ActionResult Details(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            return View();
-        }
+            var avali = await _context.AvaliacaoTable
+                .Include(t=> t.Receita)
+                .FirstOrDefaultAsync(x=> x.Id == id);
 
-        // GET: AvaliacaoController/Create
-        public ActionResult Create()
-        {
-            return View();
+            if (avali == null)
+                return NotFound(new { Message = $"Tarefa com Id = {id} não encontrada" });
+
+            return Ok(avali);
         }
 
         // POST: AvaliacaoController/Create
