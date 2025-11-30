@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RecipeReview.Classes;
 using RecipeReview.Models;
 namespace RecipeReview.Data
 {
@@ -23,14 +22,18 @@ namespace RecipeReview.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // HERANÇA — TPH (tudo em uma tabela só)
+            // -------------------------
+            // HERANÇA — TPH
+            // -------------------------
             modelBuilder.Entity<Receita>()
                 .HasDiscriminator<string>("Tipo")
                 .HasValue<ReceitaDoce>("Doce")
                 .HasValue<ReceitaSalgada>("Salgada")
                 .HasValue<Bebida>("Bebida");
 
-            // RELAÇÃO N:N COM DADOS (ingredientes)
+            // -------------------------
+            // RELAÇÃO N:N COM TABELA PRÓPRIA
+            // -------------------------
             modelBuilder.Entity<ReceitaIngrediente>(entity =>
             {
                 entity.HasKey(ri => new { ri.ReceitaId, ri.IngredienteId });
@@ -42,25 +45,39 @@ namespace RecipeReview.Data
                 entity.HasOne(ri => ri.Ingrediente)
                     .WithMany(i => i.Receitas)
                     .HasForeignKey(ri => ri.IngredienteId);
+
+                // Corrige o aviso de truncamento de DECIMAL
+                entity.Property(ri => ri.Quantidade)
+                    .HasPrecision(10, 3);
             });
 
-            // Relação Usuario -> Receitas criadas
+            // -------------------------
+            // RELAÇÃO Usuario → Receitas
+            // -------------------------
             modelBuilder.Entity<Usuario>()
                 .HasMany(u => u.ReceitasCriadas)
                 .WithOne(r => r.Usuario)
-                .HasForeignKey(r => r.UsuarioId);
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Relação Usuario -> Avaliações
+            // -------------------------
+            // RELAÇÃO Usuario → Avaliações
+            // -------------------------
             modelBuilder.Entity<Usuario>()
                 .HasMany(u => u.Avaliacoes)
                 .WithOne(a => a.Usuario)
-                .HasForeignKey(a => a.UsuarioId);
+                .HasForeignKey(a => a.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Relação Receita -> Avaliações
+            // -------------------------
+            // RELAÇÃO Receita → Avaliações
+            // (correção aqui)
+            // -------------------------
             modelBuilder.Entity<Receita>()
-                .HasMany<Avaliacao>()
+                .HasMany(r => r.Avaliacoes)
                 .WithOne(a => a.Receita)
-                .HasForeignKey(a => a.ReceitaId);
+                .HasForeignKey(a => a.ReceitaId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

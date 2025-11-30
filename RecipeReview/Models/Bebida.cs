@@ -1,4 +1,4 @@
-﻿namespace RecipeReview.Classes
+﻿namespace RecipeReview.Models
 {
     public class Bebida : Receita
     {

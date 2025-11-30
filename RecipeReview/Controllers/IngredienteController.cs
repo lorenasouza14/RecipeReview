@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RecipeReview.Classes;
 using RecipeReview.Data;
 using RecipeReview.Models;
 using System.Threading.Tasks;
@@ -50,13 +49,13 @@ namespace RecipeReview.Controllers
             _context.IngredienteTable.Add(ingrediente);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAluno", new { id = ingrediente.Id }, ingrediente);
+            return CreatedAtAction(nameof(GetIngrediente), new { id = ingrediente.Id }, ingrediente);
         }
 
 
         // PUT api/<Ingredientes>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAluno(int id, Ingrediente ingrediente)
+        public async Task<IActionResult> PutIngrediente(int id, Ingrediente ingrediente)
         {
             if (id != ingrediente.Id)
             {

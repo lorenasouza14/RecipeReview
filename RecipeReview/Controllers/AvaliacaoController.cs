@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecipeReview.Data;
+using RecipeReview.Models;
 
 namespace RecipeReview.Controllers
 {
-    public class AvaliacaoController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AvaliacaoController : ControllerBase
     {
         private readonly DataContext _context;
 
@@ -13,85 +15,147 @@ namespace RecipeReview.Controllers
         {
             _context = context;
         }
-        // GET: AvaliacaoController
-        
+
+        // GET: api/avaliacao
+        [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var avalis = await _context.AvaliacaoTable
-                .Include (t=> t.Receita)
+            var avaliacoes = await _context.AvaliacaoTable
+                .Include(a => a.Usuario)
+                .Include(a => a.Receita)
                 .ToListAsync();
 
-            return Ok(avalis);
+            return Ok(avaliacoes);
         }
 
-        // GET: AvaliacaoController/Details/5
+        // GET: api/avaliacao/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var avali = await _context.AvaliacaoTable
-                .Include(t=> t.Receita)
-                .FirstOrDefaultAsync(x=> x.Id == id);
+            var avaliacao = await _context.AvaliacaoTable
+                .Include(a => a.Usuario)
+                .Include(a => a.Receita)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (avali == null)
-                return NotFound(new { Message = $"Tarefa com Id = {id} não encontrada" });
+            if (avaliacao == null)
+                return NotFound(new { Message = $"Avaliação com Id={id} não encontrada." });
 
-            return Ok(avali);
+            return Ok(avaliacao);
         }
 
-        // POST: AvaliacaoController/Create
+        // POST: api/avaliacao
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Post([FromBody] Avaliacao newAvaliacao)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            if (newAvaliacao == null)
+                return BadRequest("O corpo da requisição é inválido.");
+
+            if (newAvaliacao.Nota < 1 || newAvaliacao.Nota > 5)
+                return BadRequest("A nota deve ser entre 1 e 5.");
+
+            var usuario = await _context.UsuarioTable.FindAsync(newAvaliacao.UsuarioId);
+            if (usuario == null)
+                return BadRequest($"Usuário com Id={newAvaliacao.UsuarioId} não encontrado.");
+
+            var receita = await _context.ReceitaTable.FindAsync(newAvaliacao.ReceitaId);
+            if (receita == null)
+                return BadRequest($"Receita com Id={newAvaliacao.ReceitaId} não encontrada.");
+
+            _context.AvaliacaoTable.Add(newAvaliacao);
+            await _context.SaveChangesAsync();
+
+            var createdAvaliacao = await _context.AvaliacaoTable
+                .Include(a => a.Usuario)
+                .Include(a => a.Receita)
+                .FirstOrDefaultAsync(a => a.Id == newAvaliacao.Id);
+
+            return CreatedAtAction(nameof(GetById), new { id = newAvaliacao.Id }, createdAvaliacao);
         }
 
-        // GET: AvaliacaoController/Edit/5
-        public ActionResult Edit(int id)
+        // PUT: api/avaliacao/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] Avaliacao updatedAvaliacao)
         {
-            return View();
+            if (updatedAvaliacao == null)
+                return BadRequest("O corpo da requisição é inválido.");
+
+            var existing = await _context.AvaliacaoTable.FirstOrDefaultAsync(x => x.Id == id);
+            if (existing == null)
+                return NotFound(new { Message = $"Avaliação com Id={id} não encontrada." });
+
+            if (updatedAvaliacao.Nota < 1 || updatedAvaliacao.Nota > 5)
+                return BadRequest("A nota deve ser entre 1 e 5.");
+
+            var usuario = await _context.UsuarioTable.FindAsync(updatedAvaliacao.UsuarioId);
+            if (usuario == null)
+                return BadRequest($"Usuário com Id={updatedAvaliacao.UsuarioId} não encontrado.");
+
+            var receita = await _context.ReceitaTable.FindAsync(updatedAvaliacao.ReceitaId);
+            if (receita == null)
+                return BadRequest($"Receita com Id={updatedAvaliacao.ReceitaId} não encontrada.");
+
+            updatedAvaliacao.Id = existing.Id;
+
+            _context.Entry(existing).CurrentValues.SetValues(updatedAvaliacao);
+            await _context.SaveChangesAsync();
+
+            var updated = await _context.AvaliacaoTable
+                .Include(a => a.Usuario)
+                .Include(a => a.Receita)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            return Ok(new
+            {
+                Message = "Avaliação atualizada com sucesso.",
+                Updated = updated
+            });
         }
 
-        // POST: AvaliacaoController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        
+        // PATCH: api/avaliacao/5
+        // Atualizar parcialmente (nota e/ou comentário)
+      
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(int id, [FromBody] Avaliacao partialUpdate)
         {
-            try
+            var avaliacao = await _context.AvaliacaoTable.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (avaliacao == null)
+                return NotFound(new { Message = $"Avaliação com Id={id} não encontrada." });
+
+            // Atualiza somente os campos preenchidos
+            if (partialUpdate.Nota != 0)
             {
-                return RedirectToAction(nameof(Index));
+                if (partialUpdate.Nota < 1 || partialUpdate.Nota > 5)
+                    return BadRequest("A nota deve ser entre 1 e 5.");
+
+                avaliacao.Nota = partialUpdate.Nota;
             }
-            catch
+
+            if (!string.IsNullOrEmpty(partialUpdate.Comentario))
+                avaliacao.Comentario = partialUpdate.Comentario;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
             {
-                return View();
-            }
+                Message = "Avaliação atualizada parcialmente.",
+                Updated = avaliacao
+            });
         }
 
-        // GET: AvaliacaoController/Delete/5
-        public ActionResult Delete(int id)
+        // DELETE: api/avaliacao/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return View();
-        }
+            var avaliacao = await _context.AvaliacaoTable.FirstOrDefaultAsync(x => x.Id == id);
+            if (avaliacao == null)
+                return NotFound(new { Message = $"Avaliação com Id={id} não encontrada." });
 
-        // POST: AvaliacaoController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            _context.AvaliacaoTable.Remove(avaliacao);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Avaliação removida com sucesso." });
         }
     }
 }

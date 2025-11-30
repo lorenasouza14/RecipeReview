@@ -1,6 +1,4 @@
-﻿using RecipeReview.Classes;
-
-namespace RecipeReview.Classes
+﻿namespace RecipeReview.Models
 {
     public class ReceitaSalgada : Receita
     {
