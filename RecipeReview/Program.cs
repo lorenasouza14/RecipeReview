@@ -1,7 +1,8 @@
-
+﻿
 using Microsoft.EntityFrameworkCore;
 using RecipeReview.Data;
 using System.Text.Json.Serialization;
+using System.Text;
 
 namespace RecipeReview
 {
@@ -12,14 +13,14 @@ namespace RecipeReview
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddControllers();
+
+            // Conexão com SQL Server
+            builder.Services.AddDbContext<DataContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllers();
 
-            //Junta a classe de contexto com o SQL Server
-            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -27,6 +28,8 @@ namespace RecipeReview
             {
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
+
+            builder.Services.AddHttpClient<RecipeService>();
 
             var app = builder.Build();
 
@@ -39,8 +42,9 @@ namespace RecipeReview
 
             app.UseHttpsRedirection();
 
+            // ATIVAR autenticação antes
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

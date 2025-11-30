@@ -10,15 +10,14 @@ namespace RecipeReview.Controllers
     public class ReceitaController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly RecipeService _recipeService; 
 
-        public ReceitaController(DataContext context)
+        public ReceitaController(DataContext context, RecipeService recipeService)
         {
             _context = context;
+            _recipeService = recipeService;
         }
 
-
-        // GET: api/receita
- 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -31,9 +30,6 @@ namespace RecipeReview.Controllers
             return Ok(receitas);
         }
 
-      
-        // GET: api/receita/5
-   
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -49,9 +45,6 @@ namespace RecipeReview.Controllers
             return Ok(receita);
         }
 
-
-        // POST: api/receita
-  
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Receita novaReceita)
         {
@@ -62,17 +55,13 @@ namespace RecipeReview.Controllers
             if (usuario == null)
                 return BadRequest($"Usuário com Id={novaReceita.UsuarioId} não encontrado.");
 
-            // salva ingredientes enviados para usar depois
             var ingredientes = novaReceita.Ingredientes;
 
-            // impede o EF de tentar inserir ingredientes automaticamente
             novaReceita.Ingredientes = null;
 
-            // salva só a receita
             _context.ReceitaTable.Add(novaReceita);
             await _context.SaveChangesAsync();
 
-            // agora adiciona a tabela N:N manualmente
             if (ingredientes != null)
             {
                 foreach (var ing in ingredientes)
@@ -82,8 +71,8 @@ namespace RecipeReview.Controllers
                         return BadRequest($"Ingrediente com Id={ing.IngredienteId} não encontrado.");
 
                     ing.ReceitaId = novaReceita.Id;
-                    ing.Ingrediente = null; // importante
-                    ing.Receita = null;     // importante
+                    ing.Ingrediente = null;
+                    ing.Receita = null;
 
                     _context.ReceitasIngredientesTable.Add(ing);
                 }
@@ -100,8 +89,6 @@ namespace RecipeReview.Controllers
             return CreatedAtAction(nameof(GetById), new { id = novaReceita.Id }, criada);
         }
 
-
-        // PUT: api/receita/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Receita receitaAtualizada)
         {
@@ -120,7 +107,6 @@ namespace RecipeReview.Controllers
                 return BadRequest($"Usuário com Id={receitaAtualizada.UsuarioId} não encontrado.");
 
             _context.Entry(existente).CurrentValues.SetValues(receitaAtualizada);
-
             await _context.SaveChangesAsync();
 
             var atualizada = await _context.ReceitaTable
@@ -135,10 +121,6 @@ namespace RecipeReview.Controllers
                 Updated = atualizada
             });
         }
-
-
-        // PATCH: adicionar ingrediente
-        // api/receita/5/ingredientes
 
         [HttpPatch("{id}/ingredientes")]
         public async Task<IActionResult> PatchAdicionarIngrediente(int id, [FromBody] ReceitaIngrediente novoIngrediente)
@@ -163,7 +145,6 @@ namespace RecipeReview.Controllers
             };
 
             receita.Ingredientes.Add(novo);
-
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -173,8 +154,6 @@ namespace RecipeReview.Controllers
             });
         }
 
-     
-        // DELETE: api/receita/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -187,6 +166,22 @@ namespace RecipeReview.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { Message = $"Receita '{receita.Nome}' removida com sucesso." });
+        }
+
+
+        [HttpGet("externo/ingrediente/{ingrediente}")]
+        public async Task<IActionResult> BuscarExternoPorIngrediente(string ingrediente)
+        {
+            var lista = await _recipeService.BuscarPorIngrediente(ingrediente);
+            return Ok(lista);
+        }
+
+        // GET: api/receita/externo/detalhes/52940
+        [HttpGet("externo/detalhes/{id}")]
+        public async Task<IActionResult> BuscarExternoDetalhes(string id)
+        {
+            var receita = await _recipeService.BuscarDetalhes(id);
+            return Ok(receita);
         }
     }
 }

@@ -11,7 +11,7 @@ using RecipeReview.Data;
 namespace RecipeReview.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251129215030_inicial")]
+    [Migration("20251130211825_inicial")]
     partial class inicial
     {
         /// <inheritdoc />
