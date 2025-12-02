@@ -1,52 +1,48 @@
-#                               **🍽️ # RecipeReview – API em C#**
-
-Um sistema completo de API REST para gerenciamento de receitas e avaliações, desenvolvido em C# com ASP.NET Core e Entity Framework Core.
+<h1 align="center">
+🍽️  RecipeReview – API em C#
+</h1>  
+<p align="center">
+  Um sistema completo de API REST para gerenciamento de receitas e avaliações, desenvolvido em C# com ASP.NET Core e Entity Framework Core.
 Permite cadastrar ingredientes, usuários, receitas e avaliações, além de oferecer endpoints para listagem, edição e exclusão desses recursos.
+</p>
 
-🚀 Tecnologias Utilizadas
+<h2 >🚀 Tecnologias Utilizadas</h2>
+<ul>
+<li>C# / .NET 8</li>
+<li>ASP.NET Core Web API</li>
+<li>Entity Framework Core</li>
+<li>SQL Server</li>
+<li>Swagger</li>
+<li>Migrations</li>
+</ul>
 
-C# / .NET 8
+<h2 >📌 Funcionalidades</h2>
+<h3>👤 Usuários</h3>
+<ul>
+<li>CRUD</li>
+<li>Associar receitas criadas</li>
+<li>Consultar dados do usuário</li>
+</ul>
 
-ASP.NET Core Web API
+<h3>🥘 Receitas</h3>
+<ul>
+<li>CRUD</li>
+<li>Relacionar ingredientes</li>
+<li>Relacionar autor da receita (usuário)</li>
+<li>Relacionar avaliações feitas por outros usuários</li>
+<li>Consumo de API <a href="https://www.themealdb.com/"> TheMealDB</a></li>
+</ul>
 
-Entity Framework Core
+<h3>🧂 Ingredientes</h3>
+<ul>
+<li>CRUD</li>
+<li>Associação a receitas</li>
+</ul>
 
-SQL Server (ou outro banco configurado)
-
-Swagger / Swashbuckle
-
-Migrations (EF Core Code First)
-
-📌 Funcionalidades
-👤 Usuários
-
-Criar novos usuários
-
-Associar receitas criadas
-
-Consultar dados do usuário
-
-🥘 Receitas
-
-Criar, listar, buscar por ID
-
-Relacionar ingredientes
-
-Relacionar autor (usuário)
-
-Relacionar avaliações feitas por outros usuários
-
-🧂 Ingredientes
-
-Cadastro e listagem
-
-Associação a receitas
-
-⭐ Avaliações
-
-Inserir nota e comentário
-
-Associar usuário e receita
-
-Média de avaliações por receita
+<h3>⭐ Avaliações</h3>
+<ul>
+<li>CRUD</li>
+<li>Inserir nota e comentário</li>
+<li>Associar usuário e receita</li>
+</ul>
 
