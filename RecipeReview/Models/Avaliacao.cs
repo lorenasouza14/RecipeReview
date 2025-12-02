@@ -1,4 +1,6 @@
-﻿namespace RecipeReview.Models
+﻿using System.Text.Json.Serialization;
+
+namespace RecipeReview.Models
 {
     public class Avaliacao
     {

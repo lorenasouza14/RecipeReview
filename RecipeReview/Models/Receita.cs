@@ -1,4 +1,6 @@
-﻿namespace RecipeReview.Models
+﻿using System.Text.Json.Serialization;
+
+namespace RecipeReview.Models
 {
     public class Receita
     {
@@ -14,11 +16,13 @@
         public string Tipo { get; set; }
 
         public int UsuarioId { get; set; }
-        public Usuario? Usuario { get; set; }
 
+        [JsonIgnore]
+        public Usuario? Usuario { get; set; }
 
         public List<ReceitaIngrediente> Ingredientes { get; set; }
 
+        [JsonIgnore]
         public List<Avaliacao>? Avaliacoes { get; set; }
 
 
