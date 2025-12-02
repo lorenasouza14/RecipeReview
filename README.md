@@ -5,6 +5,9 @@
   Um sistema completo de API REST para gerenciamento de receitas e avaliações, desenvolvido em C# com ASP.NET Core e Entity Framework Core.
 Permite cadastrar ingredientes, usuários, receitas e avaliações, além de oferecer endpoints para listagem, edição e exclusão desses recursos.
 </p>
+<p align="center">
+  <img src="/cat chef GIF.gif" alt="demo" width="500">
+</p>
 
 <h2 >🚀 Tecnologias Utilizadas</h2>
 <ul>
