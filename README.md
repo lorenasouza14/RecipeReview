@@ -6,7 +6,7 @@
 Permite cadastrar ingredientes, usuários, receitas e avaliações, além de oferecer endpoints para listagem, edição e exclusão desses recursos.
 </p>
 <p align="center">
-  <img src="/cat chef GIF.gif" alt="demo" width="500">
+  <img src="/cat chef GIF.gif" alt="demo" width="200">
 </p>
 
 <h2 >🚀 Tecnologias Utilizadas</h2>
@@ -49,3 +49,7 @@ Permite cadastrar ingredientes, usuários, receitas e avaliações, além de ofe
 <li>Associar usuário e receita</li>
 </ul>
 
+
+<footer>
+  <p><i>Projeto desenvolvido por Lorena Batista e João Otávio para a matéria de Plataforma de Desenvolvimento de Sistemas - 2025.</i></p>
+</footer>
