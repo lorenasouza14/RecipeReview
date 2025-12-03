@@ -59,7 +59,7 @@ namespace RecipeReview.Controllers
         {
             if (id != ingrediente.Id)
             {
-                return BadRequest();
+                return BadRequest("Id Inválido.");
             }
 
             _context.Entry(ingrediente).State = EntityState.Modified;
@@ -72,7 +72,7 @@ namespace RecipeReview.Controllers
             {
                 if (!IngredienteExiste(id))
                 {
-                    return NotFound();
+                    return NotFound("Ingrediente não encontrado.");
                 }
                 else
                 {

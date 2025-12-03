@@ -39,7 +39,7 @@ namespace RecipeReview.Controllers
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
-                return NotFound();
+                return NotFound("Usuário não encontrado.");
 
             return user;
         }
